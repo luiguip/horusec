@@ -35,7 +35,77 @@ spec:
     volumeMounts:
     - name: sec-ctx-vol
       mountPath: /data/demo`
+	SampleVulnerableHSKUBERNETES2 = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hostaliases-pod
+spec:
+  restartPolicy: Never
+  hostAliases:
+  - ip: "127.0.0.1"
+    hostnames:
+    - "foo.local"
+    - "bar.local"
+  - ip: "10.1.2.3"
+    hostnames:
+    - "foo.remote"
+    - "bar.remote"
+  containers:
+  - name: cat-hosts
+    image: busybox
+    command:
+    - cat
+    args:
+    - "/etc/hosts"
+`
+	SampleVulnerableHSKUBERNETES3 = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-hostpath
+spec:
+  []...]
+  volumes:
+  - name: test-volume
+    hostPath:
+      path: /var/run/docker.sock
+`
+	SampleVulnerableHSKUBERNETES4 = `
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+...
+      containers:
+      - name: payment
+        image: nginx
+        securityContext:
+          capabilities:
+            drop: # Drop all capabilities from a pod as above
+              - all
+            add: # Add sys_admin is broken of security
+              - SYS_ADMIN
+`
+	SampleVulnerableHSKUBERNETES5 = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged
+spec:
+  containers:
+    - name: pause
+      image: k8s.gcr.io/pause
+      # Security Context should not be use with privileged option enable
+      securityContext:
+        privileged: true
+`
+	SampleVulnerableHSKUBERNETES6 = ``
+	SampleVulnerableHSKUBERNETES7 = ``
+	SampleVulnerableHSKUBERNETES8 = ``
+	SampleVulnerableHSKUBERNETES9 = ``
+)
 
+const (
 	SampleSafeHSKUBERNETES1 = `apiVersion: v1
 kind: Pod
 metadata:
@@ -55,4 +125,67 @@ spec:
     volumeMounts:
     - name: sec-ctx-vol
       mountPath: /data/demo`
+	SampleSafeHSKUBERNETES2 = `
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+        - path: /foo
+          backend:
+            serviceName: foo-service
+            servicePort: 8000
+        - path: /bar
+          backend:
+            serviceName: bar-service
+            servicePort: 8000
+`
+	SampleSafeHSKUBERNETES3 = `
+apiVersion: v1  
+kind: Pod  
+metadata:  
+  name: security-best-practice
+spec:  
+  containers:  
+  # specification of the pod’s containers  
+  # ...  
+  securityContext:  
+    readOnlyRootFilesystem: true
+`
+	SampleSafeHSKUBERNETES4 = `
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+...
+      containers:
+      - name: payment
+        image: nginx
+        securityContext:
+          capabilities:
+            drop: # Drop all capabilities from a pod as above
+              - all
+            add: # Add only those required
+              - NET_BIND_SERVICE
+`
+	SampleSafeHSKUBERNETES5 = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged
+spec:
+  containers:
+    - name: pause
+      image: k8s.gcr.io/pause
+      securityContext:
+        privileged: false
+`
+	SampleSafeHSKUBERNETES6 = ``
+	SampleSafeHSKUBERNETES7 = ``
+	SampleSafeHSKUBERNETES8 = ``
+	SampleSafeHSKUBERNETES9 = ``
 )
